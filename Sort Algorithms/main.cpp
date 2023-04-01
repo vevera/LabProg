@@ -1,3 +1,4 @@
+#include <exception>
 #include <iostream>
 
 #include "instances.hpp"
@@ -6,22 +7,38 @@
 
 int main(int argc, char **argv) {
 
- 
-  // for (auto** end = instances + 3; instances != end; ++instances){
-  //   print_instance<int>(*instances, 5);
-  // }
+  int instances_size, amount_of_instances;
+  double time_heap_sort, time_random_quick, time_quick, time_intro, time_intro_insertion;
+  std::string instance_type;
 
-  // instances = instances - 3;
+  if (argc != 4) {
+    std::cout << "Invalid Argument Size!!!\n";
+  }
 
-  int instances_size = 1500;
-  int amount_of_instances = 30000;
+  try{
+    instance_type = argv[1];
+    instances_size = std::stoi(argv[2]);
+    amount_of_instances = std::stoi(argv[3]);
+  }
+  catch(std::exception e){
+    std::cout << "Invalid Arguments!!\n";
+    std::cout << e.what() << std::endl;
+  }
 
-  auto** instances_1 = generate_n_instances<int, ascending_instance<int>>(instances_size, amount_of_instances);
-  auto** instances_2 = generate_n_instances<int, descending_instance<int>>(instances_size, amount_of_instances);
+  auto instance = get_instance<int>(instance_type, instances_size);
 
-  double time = run_instances<int, heap_sort<int>>(instances_1, instances_size, amount_of_instances);
-  std::cout << "ascending final time: " << time << std::endl;  
+  time_heap_sort = run_instances<int, heap_sort<int>>(instance, instances_size, amount_of_instances);
+  std::cout << "HeapSort Took " << time_heap_sort << " s to run " << amount_of_instances << " instances!\n";  
 
-  double time2 = run_instances<int, heap_sort<int>>(instances_2, instances_size, amount_of_instances);
-  std::cout << "descending final time: " << time2 << std::endl;   
+  time_random_quick = run_instances<int, random_quick_sort<int>>(instance, instances_size, amount_of_instances);
+  std::cout << "RandomQuick Sort Took " << time_random_quick << " s to run " << amount_of_instances << " instances!\n";  
+
+  time_quick = run_instances<int, quick_sort<int>>(instance, instances_size, amount_of_instances);
+  std::cout << "QuickSort Took " << time_quick << " s to run " << amount_of_instances << " instances!\n";  
+
+  time_intro = run_instances<int, introsort<int>>(instance, instances_size, amount_of_instances);
+  std::cout << "Introsort Took " << time_intro << " s to run " << amount_of_instances << " instances!\n";  
+
+  time_intro_insertion = run_instances<int, introsort_with_insertion<int>>(instance, instances_size, amount_of_instances);
+  std::cout << "Introsort with insertion Took " << time_intro_insertion << " s to run " << amount_of_instances << " instances!\n";
 }

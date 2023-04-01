@@ -3,9 +3,13 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <map>
+#include <string>
 
 #include "pivot.hpp"
 #include "swap.hpp"
+
+
 
 template <typename T>
 void print_instance(T*& instance, int instance_size){
@@ -19,48 +23,29 @@ void print_instance(T*& instance, int instance_size){
   std::cout << std::endl;
 }
 
-template <typename T, bool instance_generator(T*&, int)>
-T** generate_n_instances(int instance_size, int amount_of_instances){
+template <typename T>
+bool random_instance(T* vector, int n){
+  std::cout << "Random \n";
+  srand((unsigned) time(nullptr));
 
-  T** instances_array = new T*[amount_of_instances];
-  
-  for (T** end = instances_array + amount_of_instances; instances_array != end; ++instances_array){
-    instance_generator(*instances_array, instance_size);
+  for (T *end = vector + n; vector != end; ++vector) {
+    *vector = 1 + rand() % n;
   }
 
-  return instances_array - amount_of_instances;
+  return true;
 }
 
 template <typename T>
-bool random_instance(int*& vector, int n){
-
-  srand((unsigned) time(NULL));
-  int random;
-
-  vector = new T[n];
-  T* vec_cur = vector;
-
-  for (T *end = vec_cur + n; vec_cur != end; ++vec_cur) {
-    *vec_cur = 1 + rand() % n;
-  }
-
-  return false;
-}
-
-template <typename T>
-bool worst_case_instance(T*& vector, int n){
-
-  vector = new T[n];
+bool worst_case_instance(T* vector, int n){
+  std::cout << "Worst \n";
   int pivot_{0};
   T next_value{1};
 
   T** v_ptr2 = new T*[n];
-
   T** v_ptr2_c = v_ptr2;
-  T* v_ptr_current = vector;
 
   for (T** end_ptr = v_ptr2_c + n; v_ptr2_c != end_ptr; ++v_ptr2_c) {
-    *v_ptr2_c = v_ptr_current++;
+    *v_ptr2_c = vector++;
   }
 
   for (int start = 0; start <= n-1; start++) {
@@ -75,33 +60,38 @@ bool worst_case_instance(T*& vector, int n){
 }
 
 template <typename T>
-bool ascending_instance(int*& vector, int n){
-
-  vector = new T[n];
-
-  T* vec_cur = vector;
-  T inc{1};
-
-  for (T *end = vec_cur + n; vec_cur != end; ++vec_cur) {
-    *vec_cur = inc++;
+bool ascending_instance(T* vector, int n){
+  std::cout << "Ascending \n";
+  T acc{1};
+  for (T *end = vector + n; vector != end; ++vector) {
+    *vector = acc++;
   }
-
-  return false;
+  return true;
 }
 
 template <typename T>
-bool descending_instance(int*& vector, int n){
-
-  vector = new T[n];
-
-  T* vec_cur = vector;
+bool descending_instance(T* vector, int n){
+  std::cout << "Descending \n";
   T inc{n};
-
-  for (T *end = vec_cur + n; vec_cur != end; ++vec_cur) {
-    *vec_cur = inc--;
+  for (T *end = vector + n; vector != end; ++vector) {
+    *vector = inc--;
   }
+  return true;
+}
 
-  return false;
+template <typename T>
+T* get_instance(std::string instance_type, int n){
+
+  std::map<std::string, bool (*) (T*, int)> instances_map = {
+          {"A", random_instance<T>},
+          {"C", ascending_instance<T>},
+          {"D", descending_instance<T>},
+          {"P", worst_case_instance<T>},};
+
+  T* allocated_instance = new T[n];
+  instances_map.find(instance_type)->second(allocated_instance, n);
+
+  return allocated_instance;
 }
 
 #endif

@@ -34,12 +34,12 @@ double calculate_single_execution_run_time(T* vector, int n){
 }
 
 template <typename T, T* sort_algorithm(T*, int)>
-double run_instances(T** instances, int instance_size, int amount_of_instances){
+double run_instances(T* instance, int instance_size, int amount_of_instances){
     double total_run_time{0};
     double current_rt;
     
-    for (T** end = instances + amount_of_instances; instances != end; ++instances){
-        current_rt = calculate_single_execution_run_time<T, sort_algorithm>(*instances, instance_size);
+    for (int i = 0; i < amount_of_instances; i++){
+        current_rt = calculate_single_execution_run_time<T, sort_algorithm>(instance, instance_size);
         total_run_time = total_run_time + current_rt;
     }
 

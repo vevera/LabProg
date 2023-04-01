@@ -8,7 +8,7 @@
 
 template <typename T>
 T* heap_sort(T* vector, int n){
-
+  print_instance(vector, n);
   auto heapify = [&vector](int i, int v_size){
 
     bool heapified = false;
@@ -44,7 +44,7 @@ T* heap_sort(T* vector, int n){
       swap<T>(vector[0], vector[i]);
       heapify(0, i);
   }
-  //print_instance(vector, n);
+  print_instance(vector, n);
   return vector;
 }
 
