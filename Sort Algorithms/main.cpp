@@ -20,12 +20,12 @@ int main(int argc, char **argv) {
     instances_size = std::stoi(argv[2]);
     amount_of_instances = std::stoi(argv[3]);
   }
-  catch(std::exception e){
+  catch(std::exception &e){
     std::cout << "Invalid Arguments!!\n";
     std::cout << e.what() << std::endl;
   }
 
-  auto instance = get_instance<int>(instance_type, instances_size);
+  auto * instance = get_instance<int>(instance_type, instances_size);
 
   time_heap_sort = run_instances<int, heap_sort<int>>(instance, instances_size, amount_of_instances);
   std::cout << "HeapSort Took " << time_heap_sort << " s to run " << amount_of_instances << " instances!\n";  

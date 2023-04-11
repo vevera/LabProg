@@ -14,23 +14,18 @@ double calculate_single_execution_run_time(T* vector, int n){
     T* copy_vector = new T[n];
     std::memcpy(copy_vector, vector, size);
 
-    auto start = std::chrono::high_resolution_clock::now();
-    // unsync the I/O of C and C++.
-    std::ios_base::sync_with_stdio(false);
- 
+    auto start = std::chrono::steady_clock::now();
+    
     sort_algorithm(copy_vector, n);
  
-    auto end = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::steady_clock::now();
 
     delete[] copy_vector;
  
     // Calculating total time taken by the program.
-    double time_taken =
-      std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    std::chrono::duration<double> time_taken = end - start;
  
-    time_taken *= 1e-9;
-
-    return time_taken;
+    return time_taken.count();
 }
 
 template <typename T, T* sort_algorithm(T*, int)>

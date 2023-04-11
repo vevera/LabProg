@@ -8,8 +8,7 @@
 
 #include "pivot.hpp"
 #include "swap.hpp"
-
-
+#include "myrandomgen.hpp"
 
 template <typename T>
 void print_instance(T*& instance, int instance_size){
@@ -25,13 +24,14 @@ void print_instance(T*& instance, int instance_size){
 
 template <typename T>
 bool random_instance(T* vector, int n){
-  std::cout << "Random \n";
-  srand((unsigned) time(nullptr));
+  std::cout << "Random Instance\n";
+  
+  MyRandomGen * mygen = MyRandomGen::instance();
+  mygen->change_interval(1, n);
 
   for (T *end = vector + n; vector != end; ++vector) {
-    *vector = 1 + rand() % n;
+    *vector = mygen->generate();
   }
-
   return true;
 }
 

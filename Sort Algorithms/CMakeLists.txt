@@ -6,6 +6,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++17 -pedantic")
 set(  
       INCLUDE_FILES
       pivot.hpp
+      myrandomgen.hpp
       instances.hpp
       runtime.hpp
       sort_algorithms.hpp
