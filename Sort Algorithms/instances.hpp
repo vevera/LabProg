@@ -7,7 +7,7 @@
 #include <string>
 
 #include "pivot.hpp"
-#include "swap.hpp"
+#include "utils.hpp"
 #include "myrandomgen.hpp"
 
 template <typename T>
@@ -24,10 +24,10 @@ void print_instance(T*& instance, int instance_size){
 
 template <typename T>
 bool random_instance(T* vector, int n){
-  std::cout << "Random Instance\n";
+  std::cout << "Random Instance\n\n";
   
   MyRandomGen * mygen = MyRandomGen::instance();
-  mygen->change_interval(1, n);
+  //mygen->change_interval(1, n);
 
   for (T *end = vector + n; vector != end; ++vector) {
     *vector = mygen->generate();
@@ -37,7 +37,7 @@ bool random_instance(T* vector, int n){
 
 template <typename T>
 bool worst_case_instance(T* vector, int n){
-  std::cout << "Worst \n";
+  std::cout << "WorstCase Instance\n\n";
   int pivot_{0};
   T next_value{1};
 
@@ -61,7 +61,7 @@ bool worst_case_instance(T* vector, int n){
 
 template <typename T>
 bool ascending_instance(T* vector, int n){
-  std::cout << "Ascending \n";
+  std::cout << "Ascending Instance\n\n";
   T acc{1};
   for (T *end = vector + n; vector != end; ++vector) {
     *vector = acc++;
@@ -71,7 +71,7 @@ bool ascending_instance(T* vector, int n){
 
 template <typename T>
 bool descending_instance(T* vector, int n){
-  std::cout << "Descending \n";
+  std::cout << "Descending Instance\n\n";
   T inc{n};
   for (T *end = vector + n; vector != end; ++vector) {
     *vector = inc--;

@@ -1,5 +1,5 @@
-#ifndef MY_RANDOM_GEN
-#define MY_RANDOM_GEN
+#ifndef MY_RANDOM_GEN_HPP
+#define MY_RANDOM_GEN_HPP
 
 #include <cstddef>
 #include <random>
@@ -11,17 +11,14 @@ class MyRandomGen{
         MyRandomGen(): generator{r_disp()} {};
         
         int generate (){
-            if (distr == nullptr) {
-                std::cout << "Distr null\n"; 
-                return -1;
-            }
-
             std::uniform_int_distribution<int> int_distr = *distr;
-
             return int_distr(generator);
         }
 
         void change_interval(int start, int end){
+            if (distr != nullptr){
+                delete distr;
+            }
             distr = new std::uniform_int_distribution<int>(start, end);
         }
 

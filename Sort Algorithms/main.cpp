@@ -2,13 +2,16 @@
 #include <iostream>
 
 #include "instances.hpp"
+#include "myrandomgen.hpp"
 #include "sort_algorithms.hpp"
 #include "runtime.hpp"
+
+#include <algorithm>
 
 int main(int argc, char **argv) {
 
   int instances_size, amount_of_instances;
-  double time_heap_sort, time_random_quick, time_quick, time_intro, time_intro_insertion;
+  double time{};
   std::string instance_type;
 
   if (argc != 4) {
@@ -25,20 +28,13 @@ int main(int argc, char **argv) {
     std::cout << e.what() << std::endl;
   }
 
+  MyRandomGen::instance()->change_interval(1, instances_size);
+
   auto * instance = get_instance<int>(instance_type, instances_size);
+  auto run_sort_algorithms = get_run_sort_algorithms<int>();
 
-  time_heap_sort = run_instances<int, heap_sort<int>>(instance, instances_size, amount_of_instances);
-  std::cout << "HeapSort Took " << time_heap_sort << " s to run " << amount_of_instances << " instances!\n";  
-
-  time_random_quick = run_instances<int, random_quick_sort<int>>(instance, instances_size, amount_of_instances);
-  std::cout << "RandomQuick Sort Took " << time_random_quick << " s to run " << amount_of_instances << " instances!\n";  
-
-  time_quick = run_instances<int, quick_sort<int>>(instance, instances_size, amount_of_instances);
-  std::cout << "QuickSort Took " << time_quick << " s to run " << amount_of_instances << " instances!\n";  
-
-  time_intro = run_instances<int, introsort<int>>(instance, instances_size, amount_of_instances);
-  std::cout << "Introsort Took " << time_intro << " s to run " << amount_of_instances << " instances!\n";  
-
-  time_intro_insertion = run_instances<int, introsort_with_insertion<int>>(instance, instances_size, amount_of_instances);
-  std::cout << "Introsort with insertion Took " << time_intro_insertion << " s to run " << amount_of_instances << " instances!\n";
+  for (auto run_sort_algorithm : run_sort_algorithms){
+    time = run_sort_algorithm.second(instance, instances_size, amount_of_instances);
+    std::cout << run_sort_algorithm.first << " took " << time << "s to run " << amount_of_instances << " instances!\n";  
+  }
 }

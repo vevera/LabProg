@@ -3,20 +3,21 @@
 
 #include <iostream>
 #include "pivot.hpp"
-#include "swap.hpp"
+#include "utils.hpp"
 #include "instances.hpp"
+#include "runtime.hpp"
 
 template <typename T>
 T* heap_sort(T* vector, int n){
   //print_instance(vector, n);
-  auto heapify = [&vector](int i, int v_size){
+  auto heapify = [&vector](int i, int v_size) {
 
     bool heapified = false;
     int largest;
     int left;
     int right;
 
-    while(!heapified){
+    while(!heapified) {
       largest = i;
       left = 2 * i + 1;
       right = 2 * i + 2;
@@ -36,20 +37,20 @@ T* heap_sort(T* vector, int n){
     }
   };
 
-  for (int i = n / 2 - 1; i >= 0; i--){
+  for (int i = n / 2 - 1; i >= 0; i--) {
     heapify(i, n);
   }
 
   for (int i = n - 1; i >= 0; i--) {
-      swap<T>(vector[0], vector[i]);
-      heapify(0, i);
+    swap<T>(vector[0], vector[i]);
+    heapify(0, i);
   }
   //print_instance(vector, n);
   return vector;
 }
 
 template <typename T, int pivot_fun(int, int)>
-int partition(T* vector, int low, int high){
+int partition(T* vector, int low, int high) {
 
   int r = pivot_fun(low, high);
   swap<T>(vector[r], vector[high]);
@@ -57,51 +58,102 @@ int partition(T* vector, int low, int high){
   T pivot = vector[high];
   int i = (low - 1);
 
-  for (int j = low; j <= high- 1; j++)
-  {
-      // If current element is smaller than or
-      // equal to pivot
-      if (vector[j] <= pivot)
-      {
-          i++;    // increment index of smaller element
-          swap<T>(vector[i], vector[j]);
-      }
+  for (int j = low; j <= high- 1; j++) {
+    if (vector[j] <= pivot) {
+      i++;
+      swap<T>(vector[i], vector[j]);
+    }
   }
-  swap(vector[i + 1], vector[high]);
+  swap<T>(vector[i + 1], vector[high]);
   return (i + 1);
 }
 
 template<typename T, int pivot_fuc(int, int)>
-void internal_quick_s(T* vector, int low, int high){
-  if (low < high)
-    {
-        int pi = partition<T, pivot_fuc>(vector, low, high);
- 
-        internal_quick_s<T, pivot_fuc>(vector, low, pi - 1);
-        internal_quick_s<T, pivot_fuc>(vector, pi + 1, high);
-    }
+void internal_quick_s(T* vector, int low, int high) {
+  if (low < high) {
+    int p_point = partition<T, pivot_fuc>(vector, low, high);
+
+    internal_quick_s<T, pivot_fuc>(vector, low, p_point - 1);
+    internal_quick_s<T, pivot_fuc>(vector, p_point + 1, high);
+  }
 }
 
 template <typename T>
-T* quick_sort(T* vector, int n){
+T* quick_sort(T* vector, int n) {
   internal_quick_s<T, pivot>(vector, 0, n-1);
   return vector;
 }
 
 template <typename T>
-T* random_quick_sort(T* vector, int n){
+T* random_quick_sort(T* vector, int n) {
   internal_quick_s<T, pivot_r>(vector, 0, n-1);
   return vector;  
 }
 
 template <typename T>
-T* introsort(T* vector, int n){
+T* insertion_sort(T* vector, int begin, int end) {
+  int i, j;
+  for (i = begin + 1; i < end; i++) {
+    j = i;
+    while (j > begin && vector[j - 1] > vector[j]) {
+        swap<T>(vector[j], vector[j-1]);
+        j = j - 1;
+    }
+  }
+  return vector;
+}
+
+template <typename T, T* insertion_sort(T*, int, int) = nullptr>
+T* internal_introsort(T* vector, int low, int high, int depth_limit) {
+  
+  int n = high - low;
+
+  if (insertion_sort != nullptr && n <= 20) {
+    insertion_sort(vector, low, high);
+    return vector;
+  }
+
+  if (depth_limit == 0) { 
+    heap_sort<T>(vector, n);
+    return vector;
+  }
+
+  if (low >= high) 
+    return vector;
+
+  int p_point = partition<T, pivot_r>(vector, low, high-1);
+  internal_introsort<T, insertion_sort>(vector, low, p_point, depth_limit - 1);
+  internal_introsort<T, insertion_sort>(vector, p_point+1, high, depth_limit - 1);
+
   return vector;  
 }
 
 template <typename T>
-T* introsort_with_insertion(T* vector, int n){
+T* intro_sort(T* vector, int n) {
+  int depth_limit = 2 * log2(n);
+  internal_introsort<T>(vector, 0, n, depth_limit);
   return vector;  
+}
+
+template <typename T>
+T* intro_sort_with_insertion(T* vector, int n) {
+  int depth_limit = 2 * log2(n);
+  internal_introsort<T, insertion_sort<T>>(vector, 0, n, depth_limit);
+  return vector;  
+}
+
+template <typename T>
+std::map<std::string, double (*) (T*, int, int)> get_run_sort_algorithms(){
+
+  std::map<std::string, double (*) (T*, int, int)> run_algorithms_map = {
+    {"HeapSort", run_instances<T, heap_sort<T>>},
+    {"QuickSort", run_instances<T, quick_sort<T>>},
+    {"RandomQuickSort", run_instances<T, random_quick_sort<T>>},
+    {"IntroSort", run_instances<T, intro_sort<T>>},
+    {"IntroSort with Insertion", run_instances<T, intro_sort_with_insertion<T>>}
+  };
+
+  return run_algorithms_map;
 }
 
 #endif
