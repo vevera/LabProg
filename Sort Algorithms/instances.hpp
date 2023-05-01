@@ -27,7 +27,6 @@ bool random_instance(T* vector, int n){
   std::cout << "Random Instance\n\n";
   
   MyRandomGen * mygen = MyRandomGen::instance();
-  //mygen->change_interval(1, n);
 
   for (T *end = vector + n; vector != end; ++vector) {
     *vector = mygen->generate();

@@ -33,8 +33,7 @@ class MyRandomGen{
         std::random_device r_disp;
         std::mt19937 generator;
         std::uniform_int_distribution<int> *distr = nullptr;
-        static MyRandomGen *instance_;
-        
+        static MyRandomGen *instance_;       
 };
 
 MyRandomGen* MyRandomGen::instance_ = nullptr;

@@ -9,7 +9,6 @@
 
 template <typename T>
 T* heap_sort(T* vector, int n){
-  //print_instance(vector, n);
   auto heapify = [&vector](int i, int v_size) {
 
     bool heapified = false;
@@ -45,7 +44,6 @@ T* heap_sort(T* vector, int n){
     swap<T>(vector[0], vector[i]);
     heapify(0, i);
   }
-  //print_instance(vector, n);
   return vector;
 }
 
@@ -108,7 +106,7 @@ T* internal_introsort(T* vector, int low, int high, int depth_limit) {
   
   int n = high - low;
 
-  if (insertion_sort != nullptr && n <= 20) {
+  if (insertion_sort != nullptr && n < 18) {
     insertion_sort(vector, low, high);
     return vector;
   }
