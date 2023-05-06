@@ -23,58 +23,88 @@ int main(int argc, char **argv){
   if (instance_type == 'A') {
 
     l = *argv[2];
-    substr_size = std::stoi(argv[3]);
-    text_size = std::stoi(argv[4]);
-    iterations = std::stoi(argv[5]);
+
+    try {
+       substr_size = std::stoi(argv[3]);
+       text_size = std::stoi(argv[4]);
+       iterations = std::stoi(argv[5]);
+    }
+    catch(std::out_of_range &e){
+      std::cout << "std::stoi out of range\n";
+      return  0;
+    }
 
     auto random_generator = [&l, &substr_size, &text_size](char* P_, char* T_, int)-> void {
       substring_search::instances::generate_random_instance(P_, T_, l, substr_size, text_size);
     };
 
-    auto random_allocator = [&substr_size, &text_size](char*& P_, char*& T_, int *& O_){
+    auto random_allocator = [&substr_size, &text_size](char*& P_, char*& T_, int *& O_bf, int *& O_kmp){
       P_ = new char[substr_size];
       T_ = new char[text_size];
-      O_ = new int[text_size];
+      O_bf = new int[text_size + 1];
+      O_kmp = new int[text_size + 1];
 
-      auto deallocator = [P_, T_, O_](){
+      auto deallocator = [P_, T_, O_bf, O_kmp](){
         delete[] P_;
         delete[] T_;
-        delete[] O_;
+        delete[] O_bf;
+        delete[] O_kmp;
       };
 
       return deallocator;
     }; 
 
-    run_times = substring_search::runtime::run_instances<char>(random_generator, random_allocator, iterations);
-
+    try {
+      run_times = substring_search::runtime::run_instances<char>(random_generator, random_allocator, iterations);
+    }
+    catch(std::bad_alloc &e){
+      std::cout << "Erro na alocação de memoria!!\n";
+      return 0;
+    }
   }
 
   if (instance_type == 'R'){
 
-    x = std::stoi(argv[2]);
-    y = std::stoi(argv[3]);
+    try {
+       x = std::stoi(argv[2]);
+       y = std::stoi(argv[3]);
+    }
+    catch(std::out_of_range &e){
+      std::cout << "std::stoi out of range\n";
+      return  0;
+    }
+
     iterations = y - x + 1;
 
-    auto real_generator = [&x](const char*& P_, const char*& T_, int i)-> void {
+    auto real_generator = [x](const char*& P_, const char*& T_, int i)-> void {
       int real_i = x + i;
       substring_search::instances::generate_real_instance(P_, T_, real_i);
     };
 
-    auto real_allocator = [](const char*&, const char*&, int *& O_){
+    auto real_allocator = [](const char*&, const char*&, int *& O_bf, int *& O_kmp){
       size_t size = strlen(Texto_Livros);
-      O_ = new int[size];
+      O_bf = new int[size + 1];
+      O_kmp = new int[size + 1];
 
-      auto deallocator = [O_](){
-        delete[] O_;
+      auto deallocator = [O_bf, O_kmp](){
+        delete[] O_bf;
+        delete[] O_kmp;
       };
 
       return deallocator;
     };
 
-    run_times = substring_search::runtime::run_instances<const char>(real_generator, real_allocator, iterations);
+    try {
+      run_times = substring_search::runtime::run_instances<const char>(real_generator, real_allocator, iterations);
+    }
+    catch(std::bad_alloc &e){
+      std::cout << "Erro na alocação de memoria!!\n";
+      return 0;
+    }
+
   }
 
   std::cout << "Brute force total time: " << run_times.first << "\n";
-  std::cout << "KMP total time: " << run_times.first << "\n";
+  std::cout << "KMP total time: " << run_times.second << "\n";
   return 0;
 }
