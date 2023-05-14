@@ -11,7 +11,7 @@
 
 
 
-int main(int argc, char **argv){
+int main(int, char **argv){
 
   char instance_type;
   char l;

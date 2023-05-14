@@ -15,10 +15,9 @@ namespace runtime {
 
 bool compare_occurrences(int * occurrences_bf, int * occurrences_kmp) {
 
-    int * cur_bf = occurrences_bf;
     int * cur_kmp = occurrences_kmp;
     
-    for (cur_bf; *cur_bf != -1; ++cur_bf){
+    for (int * cur_bf = occurrences_bf; *cur_bf != -1; ++cur_bf){
         if (*cur_bf != *cur_kmp) return false;
         ++cur_kmp;
     }
@@ -58,17 +57,20 @@ std::pair<double, double> run_instances(F &&instance_generator, A &&allocator, i
     
     for (int i = 0; i < amount_of_instances; i++){
         instance_generator(pattern, text, i);
+        //substring_search::algorithms::print_vector(pattern, strlen(pattern));
+        //substring_search::algorithms::print_vector(text, strlen(text));
         total_run_time_bf = total_run_time_bf + 
                             calculate_single_execution_run_time<substring_search::algorithms::brute_force>(pattern, text, occurrences_bf);
         total_run_time_kmp = total_run_time_kmp + 
                             calculate_single_execution_run_time<substring_search::algorithms::KMP>(pattern, text, occurrences_kmp);
-
         if (!compare_occurrences(occurrences_bf, occurrences_kmp)) {
             std::cout << "Os vetores de ocorrencias foram diferentes!!\n";
             break;
         }
 
     }
+
+    std::cout << "time bf " << total_run_time_bf << std::endl;
     
     deallocator();
 
