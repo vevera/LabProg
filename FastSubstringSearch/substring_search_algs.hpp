@@ -74,8 +74,6 @@ namespace algorithms {
         int * A = new int[P_size];
         fill_A(P, A);
 
-        //print_vector(A, P_size);
-        
         int O_i{0};
         int p{0};
         int i{-1};

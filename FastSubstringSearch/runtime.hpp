@@ -25,7 +25,6 @@ bool compare_occurrences(int * occurrences_bf, int * occurrences_kmp) {
     if (*cur_kmp != -1) return false;
 
     return true;
-
 }
 
 template <void substring_search_algorithm(const char *, const char *, int *)>
@@ -57,8 +56,6 @@ std::pair<double, double> run_instances(F &&instance_generator, A &&allocator, i
     
     for (int i = 0; i < amount_of_instances; i++){
         instance_generator(pattern, text, i);
-        //substring_search::algorithms::print_vector(pattern, strlen(pattern));
-        //substring_search::algorithms::print_vector(text, strlen(text));
         total_run_time_bf = total_run_time_bf + 
                             calculate_single_execution_run_time<substring_search::algorithms::brute_force>(pattern, text, occurrences_bf);
         total_run_time_kmp = total_run_time_kmp + 
@@ -67,11 +64,8 @@ std::pair<double, double> run_instances(F &&instance_generator, A &&allocator, i
             std::cout << "Os vetores de ocorrencias foram diferentes!!\n";
             break;
         }
-
     }
 
-    std::cout << "time bf " << total_run_time_bf << std::endl;
-    
     deallocator();
 
     return std::make_pair(total_run_time_bf, total_run_time_kmp);

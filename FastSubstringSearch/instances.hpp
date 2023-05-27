@@ -35,19 +35,12 @@ namespace instances {
         for (char * p = text; p != end; ++p){
             *p = 'a' + static_cast<char>(dist_v(generator));
         }
-
-        // std::cout << pattern << std::endl;
-        // std::cout << text << std::endl;
-
     }
 
     inline void generate_real_instance(const char *& pattern, const char *& text, int i){
 
-        //std::cout << "GENERATE REAL INSTANCE\n";
-        //std::cout << "before pattern assign\n";
         pattern = Padroes_Palavras[i];
-        //std::cout << "before text assign\n";
-        text = Texto_Livros;
+        text = Texto_Livros; 
     }
 
 } //instances
