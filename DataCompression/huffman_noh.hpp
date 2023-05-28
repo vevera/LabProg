@@ -20,6 +20,7 @@ struct HuffmanNoh{
     
     HuffmanNoh(uint16_t leaf_value_)  {
         left = leaf_value_;
+        right = 1L;
     }
 };
 
