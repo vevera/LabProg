@@ -24,19 +24,13 @@ class Heap {
   private:
     void heapify(size_t start_i, size_t arr_length);
     void heapify_bottomup(size_t start_i, size_t arr_length);
-    size_t last_index;
     T* buffer;
+    size_t last_index{0};
   
 };
 
 template <class T>
 Heap<T>::Heap(size_t heap_size) : buffer{new T[heap_size]}, last_index{0} {}
-
-template <class T>
-void Heap<T>::add_element(T element) {
-  buffer[last_index] = element;
-  heapify_bottomup(last_index++, last_index + 1);
-}
 
 template <class T>
 T Heap<T>::get_first() {
@@ -50,9 +44,9 @@ template <class T>
 void Heap<T>::heapify(size_t start_i, size_t arr_length){
   
     bool heapified = false;
-    int smallest;
-    int left;
-    int right;
+    size_t smallest;
+    size_t left;
+    size_t right;
 
     while(!heapified) {
       smallest = start_i;
@@ -90,6 +84,13 @@ void Heap<T>::heapify_bottomup(size_t start_i, size_t arr_length){
         heapified = true; 
       } 
     }
+}
+
+template <class T>
+void Heap<T>::add_element(T element) {
+  buffer[last_index] = element;
+  heapify_bottomup(last_index, last_index + 1);
+  ++last_index;
 }
 
 

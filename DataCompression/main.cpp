@@ -1,6 +1,6 @@
+#include "compressor.hpp"
 #include "heap.hpp"
 #include "huffman_noh.hpp"
-#include "compressor.hpp"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -8,34 +8,19 @@
 #include <unordered_map>
 #include <vector>
 
-int main() {
+int main(int argc, char **argv) {
 
-  // {
-  //   std::ifstream source("compressed", std::ios_base::in | std::ios_base::binary);
-  //   int n;
-  //   source.read(reinterpret_cast<char *>(&n), sizeof(int));
+  if (argc != 4) {
+    std::cout << "Invalid arguments size!!\n";
+    return 0;
+  }
 
-  //   std::cout << n << std::endl;
+  std::string cmd = argv[1];
 
-  //   std::streampos next_seek = sizeof(int);
-  //   source.seekg(next_seek);
-
-  //   HuffmanNoh *huff_tree = new HuffmanNoh[(2 * n) - 1];
-  //   source.read(reinterpret_cast<char *>(huff_tree), (sizeof(HuffmanNoh) * (2*n-1)));
-    
-
-  //   for (int i = 0; i < n; i++) {
-  //     std::cout << huff_tree[i].left << "|";
-  //   }
-  //   std::cout << std::endl;
-  //   for (int j = n; j < 2 * n - 1; j++) {
-  //     std::cout << huff_tree[j].left << "-" << huff_tree[j].right << "|";
-  //   }
-  //   std::cout << std::endl;
-  // }
-
-  // return 0;
-
-  compressor("bytes.txt");
-
+  if (cmd == "-c") {
+    compressor(std::string(argv[2]), std::string(argv[3]));
+  }
+  if (cmd == "-d") {
+    read_compressed_file(std::string(argv[2]), std::string(argv[3]));
+  }
 }
