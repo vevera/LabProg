@@ -129,8 +129,6 @@ void compressor(std::string file_name, std::string outputfile){
     }
   }
 
-  //std::cout << std::chrono::duration<double>(std::chrono::steady_clock::now() - start_time).count() << std::endl;
-  
   source.close();
   compressed_file.close();
 }
