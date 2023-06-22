@@ -28,13 +28,11 @@ class TreeAVL;
 template <typename T>
 class Iterator {
 
-    friend class TreeAVL<T>;
-
     public:
         Iterator(std::shared_ptr<Node<T>> node, const TreeAVL<T> *tree) : iterator_{node}, tree_{tree} {};
 
-        Node<T>& operator*() const { return *iterator_; }
-        Node<T>* operator->() { return iterator_.get(); }
+        std::shared_ptr<Node<T>>& operator*() { return iterator_; }
+        std::shared_ptr<Node<T>> operator->() { return iterator_; }
         Iterator& operator++() { 
             if (iterator_->right_n_ != tree_->f_node_) {
                 iterator_ = iterator_->right_n_;
@@ -92,6 +90,7 @@ class TreeAVL {
 
         std::shared_ptr<Node<T>> InsertElement(std::shared_ptr<Node<T>> curr_node, std::shared_ptr<Node<T>> new_node);
         std::shared_ptr<Node<T>> SearchElement(std::shared_ptr<Node<T>> curr_node, T element);
+        std::shared_ptr<Node<T>> DeleteNode(std::shared_ptr<Node<T>> curr_node, std::shared_ptr<Node<T>> node_to_be_deleted);
         std::shared_ptr<Node<T>> f_node_;
 };
 
@@ -133,7 +132,12 @@ Iterator<T> TreeAVL<T>::add(T element){
 
 template <typename T>
 Iterator<T> TreeAVL<T>::remove(T element){
-   return Iterator<T>(f_node_, this);
+   auto node_to_be_deleted = SearchElement(root_, element);
+   if (node_to_be_deleted == f_node_) {
+     return Iterator<T>(node_to_be_deleted, this);
+   }
+   root_ = DeleteNode(root_, node_to_be_deleted);
+   return Iterator<T>(root_, this);
 };
 
 template <typename T>
@@ -195,6 +199,7 @@ void TreeAVL<T>::RightLeft(std::shared_ptr<Node<T>> x, std::shared_ptr<Node<T>> 
     RightRotate(x, y);
     LeftRotate(z, y);
 }
+
 template <typename T>
 std::shared_ptr<Node<T>> TreeAVL<T>::InsertElement(std::shared_ptr<Node<T>> curr_node, std::shared_ptr<Node<T>> new_node){
     if (curr_node == f_node_) {
@@ -219,7 +224,7 @@ std::shared_ptr<Node<T>> TreeAVL<T>::InsertElement(std::shared_ptr<Node<T>> curr
             ret_node = curr_node->left_n_;
             RightRotate(curr_node->left_n_, curr_node);
         }
-        if (new_node->element_ >= curr_node->left_n_->element_){
+        else if (new_node->element_ >= curr_node->left_n_->element_){
             ret_node = curr_node->left_n_->right_n_;
             LeftRight(curr_node->left_n_, curr_node->left_n_->right_n_, curr_node);
         }
@@ -230,7 +235,7 @@ std::shared_ptr<Node<T>> TreeAVL<T>::InsertElement(std::shared_ptr<Node<T>> curr
             ret_node = curr_node->right_n_;
             LeftRotate(curr_node, curr_node->right_n_);
         }
-        if (new_node->element_ < curr_node->right_n_->element_) {
+        else if (new_node->element_ < curr_node->right_n_->element_) {
             ret_node = curr_node->right_n_->left_n_;
             RightLeft(curr_node->right_n_->left_n_, curr_node->right_n_, curr_node);
         }
@@ -258,6 +263,73 @@ std::shared_ptr<Node<T>> TreeAVL<T>::SearchElement(std::shared_ptr<Node<T>> curr
     }
 
     return SearchElement(next_search_root, element);
+}
+
+template <typename T>
+std::shared_ptr<Node<T>> TreeAVL<T>::DeleteNode(std::shared_ptr<Node<T>> curr_node, std::shared_ptr<Node<T>> node_to_be_deleted){
+
+    if (curr_node == f_node_){
+        return curr_node;
+    }
+
+    if (node_to_be_deleted->element_ < curr_node->element_) {
+        curr_node->left_n_ = DeleteNode(curr_node->left_n_, node_to_be_deleted);
+        curr_node->left_n_->parent_ =  curr_node;
+    }
+    else if(node_to_be_deleted->element_ > curr_node->element_){
+        curr_node->right_n_ = DeleteNode(curr_node->right_n_, node_to_be_deleted);
+        curr_node->right_n_->parent_ = curr_node;
+    }
+    else if(node_to_be_deleted->element_ == curr_node->element_){
+        auto left_child = curr_node->left_n_;
+        auto right_child = curr_node->right_n_;
+
+        if (left_child != f_node_ && right_child != f_node_) {
+            auto next_value = *(++Iterator(curr_node, this));
+            curr_node->element_ = next_value->element_;
+            curr_node->right_n_ = DeleteNode(curr_node->right_n_, next_value);
+            curr_node->right_n_->parent_ = curr_node;
+        }
+        else {
+            auto temp_child = left_child != f_node_? left_child: right_child;
+            curr_node = temp_child;
+        }
+    }
+
+    if (curr_node == f_node_){
+        return curr_node;
+    }
+
+    curr_node->height_ = 1 + std::max(curr_node->left_n_->height_, curr_node->right_n_->height_);
+    int balance_factor = curr_node->left_n_->height_ - curr_node->right_n_->height_;
+
+    std::shared_ptr<Node<T>> ret_node = curr_node;
+
+    if (balance_factor > 1) {
+        int left_balance_factor = curr_node->left_n_->left_n_->height_ - curr_node->left_n_->right_n_->height_;
+        if (left_balance_factor >= 0) {
+            ret_node = curr_node->left_n_;
+            RightRotate(curr_node->left_n_, curr_node);
+        }
+        else if (left_balance_factor < 0){
+            ret_node = curr_node->left_n_->right_n_;
+            LeftRight(curr_node->left_n_, curr_node->left_n_->right_n_, curr_node);
+        }
+    }
+
+    if (balance_factor < -1) {
+        int right_balance_factor = curr_node->right_n_->left_n_->height_ - curr_node->right_n_->right_n_->height_;
+        if (right_balance_factor <= 0) {
+            ret_node = curr_node->right_n_;
+            LeftRotate(curr_node, curr_node->right_n_);
+        }
+        else if (right_balance_factor > 0) {
+            ret_node = curr_node->right_n_->left_n_;
+            RightLeft(curr_node->right_n_->left_n_, curr_node->right_n_, curr_node);
+        }
+    }
+
+    return ret_node;
 }
 
 #endif //TREE_HPP
