@@ -46,6 +46,10 @@ class DicioAVL
       Noh* pai_;
       int altura_;
 
+      Noh() {};
+
+      Noh(Noh* default_, TC chave, TV valor): filho_dir_{default_}, filho_esq_{default_}, pai_{default_}, chave{chave}, valor{valor} {}
+
       Noh* obter_dir (){
        return filho_dir_;
       }
@@ -64,21 +68,25 @@ class DicioAVL
    Noh *raiz;  // "raiz" deve apontar para "sent" quando a Ã¡rvore estiver vazia.
 
    // ==========================================================================
-
-   private:
-    template <typename FuncDef>
-    void ApplyFunctionToElements(Noh* root, FuncDef &function){
+   template <typename FuncDef>
+   void ApplyFunctionToElements(Noh* root, FuncDef &function){
       if (root == &sent){
         return;
       }
+      std::cout << "about to call ApplyFunctionToElements to left son" << std::endl;
       ApplyFunctionToElements(root->filho_esq_, function);
+      std::cout << "about to call ApplyFunctionToElements to right son" << std::endl;
       ApplyFunctionToElements(root->filho_dir_, function);
+      std::cout << "Actually applying func to element > " << root->chave << std::endl;
       function(root);
     }
+   private:
 
-    void RotacaoEsquerda(Noh* x, Noh* y){
+    Noh* RotacaoEsquerda(Noh* x){
+
+      Noh* y = x->filho_dir_;
       x->filho_dir_ = y->filho_esq_;
-      y->filho_esq_->pai_ = x;
+      x->filho_dir_->pai_ = x;
 
       y->pai_ = x->pai_;
       if (x->pai_ == &sent) {
@@ -92,11 +100,18 @@ class DicioAVL
       }
       x->pai_ = y;
       y->filho_esq_ = x;
+
+      y->altura_ = std::max(y->filho_dir_->altura_, y->filho_esq_->altura_) + 1;
+      x->altura_ = std::max(x->filho_dir_->altura_, x->filho_esq_->altura_) + 1;
+
+      return y;
     }
 
-    void RotacaoDireita(Noh* x, Noh* y){
+    Noh* RotacaoDireita(Noh* y){
+
+      Noh* x = y->filho_esq_;
       y->filho_esq_ = x->filho_dir_;
-      x->filho_dir_->pai_ = y;
+      y->filho_esq_->pai_ = y;
 
       x->pai_ = y->pai_;
       if (y->pai_ == &sent) {
@@ -108,21 +123,20 @@ class DicioAVL
       else if (y->pai_->filho_esq_ == y){
           y->pai_->filho_esq_ = x;
       }
+
       y->pai_ = x;
       x->filho_dir_ = y;
-    }
 
-    void RotacaoEsquerdaDireita(Noh* x, Noh* y, Noh* z){
-      RotacaoEsquerda(x, y);
-      RotacaoDireita(y, z);
-    }
+      y->altura_ = std::max(y->filho_dir_->altura_, y->filho_esq_->altura_) + 1;
+      x->altura_ = std::max(x->filho_dir_->altura_, x->filho_esq_->altura_) + 1;
 
-    void RotacaoDireitaEsquerda(Noh* x, Noh* y, Noh* z){
-      RotacaoDireita(x, y);
-      RotacaoEsquerda(z, y);
+      return x;
     }
 
     Noh* interno_inserir(Noh* noh_atual, Noh* novo_noh){
+      std::cout << "case insert > " << novo_noh->chave << " \n";
+      std::cout << "curr noh > " << noh_atual->chave << " \n";
+
       if (noh_atual == &sent){
         return novo_noh;
       }
@@ -138,31 +152,34 @@ class DicioAVL
       noh_atual->altura_ = 1 + std::max(noh_atual->filho_esq_->altura_, noh_atual->filho_dir_->altura_);
       int balance_factor = noh_atual->filho_esq_->altura_ - noh_atual->filho_dir_->altura_;
 
-      Noh* noh_retorno = noh_atual;
-
       if (balance_factor > 1) {
+        std::cout << "if balance_factor > 1\n";
         if (novo_noh->chave < noh_atual->filho_esq_->chave) {
-            noh_retorno = noh_atual->filho_esq_;
-            RotacaoDireita(noh_atual->filho_esq_, noh_atual);
+            std::cout << "if novo_noh->chave < noh_atual->filho_esq_->chave\n";
+            return RotacaoDireita(noh_atual);
         }
-        else if (novo_noh->chave >= noh_atual->filho_esq_->chave){
-            noh_retorno = noh_atual->filho_esq_->filho_dir_;
-            RotacaoEsquerdaDireita(noh_atual->filho_esq_, noh_atual->filho_esq_->filho_dir_, noh_atual);
+        else if (novo_noh->chave > noh_atual->filho_esq_->chave){
+            std::cout << "if novo_noh->chave > noh_atual->filho_esq_->chave\n";
+            noh_atual->filho_esq_ = RotacaoEsquerda(noh_atual->filho_esq_);
+            return RotacaoDireita(noh_atual);
         }
       }
 
       if (balance_factor < -1) {
-        if (novo_noh->chave >= noh_atual->filho_dir_->chave) {
-            noh_retorno = noh_atual->filho_dir_;
-            RotacaoEsquerda(noh_atual, noh_atual->filho_dir_);
+        std::cout << "if balance_factor < -1\n";
+        if (novo_noh->chave > noh_atual->filho_dir_->chave) {
+            std::cout << "novo_noh->chave > noh_atual->filho_dir_->chave\n";
+            return RotacaoEsquerda(noh_atual);
         }
         else if (novo_noh->chave < noh_atual->filho_dir_->chave) {
-            noh_retorno = noh_atual->filho_dir_->filho_esq_;
-            RotacaoDireitaEsquerda(noh_atual->filho_dir_->filho_esq_, noh_atual->filho_dir_, noh_atual);
+            std::cout << "novo_noh->chave > noh_atual->filho_dir_->chave\n";
+            noh_atual->filho_dir_ = RotacaoDireita(noh_atual->filho_dir_);
+            return RotacaoEsquerda(noh_atual);
+
         }
       }
 
-      return noh_retorno;
+      return noh_atual;
     }
 
     Noh* interno_busca(Noh* noh_atual, TC chave) {
@@ -185,17 +202,17 @@ class DicioAVL
       return interno_busca(prox_raiz_busca, chave);
     }
     
-    Noh*  interno_remover(Noh* noh_atual, Noh* noh_a_ser_removido){
+    Noh*  interno_remover(Noh* noh_atual, Noh* noh_a_ser_removido, bool& deleted){
       if (noh_atual == &sent){
           return noh_atual;
       }
 
       if (noh_a_ser_removido->chave < noh_atual->chave) {
-          noh_atual->filho_esq_ = interno_remover(noh_atual->filho_esq_, noh_a_ser_removido);
+          noh_atual->filho_esq_ = interno_remover(noh_atual->filho_esq_, noh_a_ser_removido, deleted);
           noh_atual->filho_esq_->pai_ =  noh_atual;
       }
       else if(noh_a_ser_removido->chave > noh_atual->chave){
-          noh_atual->filho_dir_ = interno_remover(noh_atual->filho_dir_, noh_a_ser_removido);
+          noh_atual->filho_dir_ = interno_remover(noh_atual->filho_dir_, noh_a_ser_removido, deleted);
           noh_atual->filho_dir_->pai_ = noh_atual;
       }
       else if(noh_a_ser_removido->chave == noh_atual->chave){
@@ -206,16 +223,25 @@ class DicioAVL
           Noh * temp = noh_atual;
           if (left_child != &sent && right_child != &sent) {
               next_value = *(++Iterador(noh_atual, this));
-              next_value->filho_esq_ = noh_atual->filho_esq_;
+              auto f_esq = noh_atual->filho_esq_;
               noh_atual = next_value;
-              noh_atual->filho_dir_ = interno_remover(temp->filho_dir_, next_value);
+              if (!deleted) {
+                deleted = true;
+                delete temp;
+              }  
+              noh_atual->filho_dir_ = interno_remover(temp->filho_dir_, next_value, deleted);
+              noh_atual->filho_esq_ = f_esq;
+              noh_atual->filho_esq_->pai_ = f_esq;
               noh_atual->filho_dir_->pai_ = noh_atual;
           }
           else {
               next_value = left_child != &sent? left_child: right_child;
               noh_atual = next_value;
-          }
-          delete temp;
+              if (!deleted) {
+                deleted = true;
+                delete temp;
+              } 
+          } 
       }
 
       if (noh_atual == &sent){
@@ -230,24 +256,22 @@ class DicioAVL
       if (balance_factor > 1) {
           int left_balance_factor = noh_atual->filho_esq_->filho_esq_->altura_ - noh_atual->filho_esq_->filho_dir_->altura_;
           if (left_balance_factor >= 0) {
-              noh_retorno = noh_atual->filho_esq_;
-              RotacaoDireita(noh_atual->filho_esq_, noh_atual);
+              return RotacaoDireita(noh_atual);
           }
           else if (left_balance_factor < 0){
-              noh_retorno = noh_atual->filho_esq_->filho_dir_;
-              RotacaoEsquerdaDireita(noh_atual->filho_esq_, noh_atual->filho_esq_->filho_dir_, noh_atual);
+              noh_atual->filho_esq_ = RotacaoEsquerda(noh_atual->filho_esq_);
+              return RotacaoDireita(noh_atual);
           }
       }
 
       if (balance_factor < -1) {
           int right_balance_factor = noh_atual->filho_dir_->filho_esq_->altura_ - noh_atual->filho_dir_->filho_dir_->altura_;
           if (right_balance_factor <= 0) {
-              noh_retorno = noh_atual->filho_dir_;
-              RotacaoEsquerda(noh_atual, noh_atual->filho_dir_);
+              return RotacaoEsquerda(noh_atual);
           }
           else if (right_balance_factor > 0) {
-              noh_retorno = noh_atual->filho_dir_->filho_esq_;
-              RotacaoDireitaEsquerda(noh_atual->filho_dir_->filho_esq_, noh_atual->filho_dir_, noh_atual);
+              noh_atual->filho_dir_ = RotacaoDireita(noh_atual->filho_dir_);
+              return RotacaoEsquerda(noh_atual);
           }
       }
 
@@ -332,9 +356,13 @@ class DicioAVL
 
    ~DicioAVL () {
       auto delete_node = [](Noh* node_to_delete) -> void {
-        delete node_to_delete;
+        if (node_to_delete != nullptr) {
+          delete node_to_delete;
+          node_to_delete->filho_dir_ = nullptr;
+        }
+          
       };
-      ApplyFunctionToElements(raiz, delete_node);
+      //ApplyFunctionToElements(raiz, delete_node);
    }
 
    Iterador begin () {
@@ -372,7 +400,8 @@ class DicioAVL
    void remover (Iterador i){
     Noh* noh_deletado = *i;
     if (noh_deletado != &sent){
-      raiz = interno_remover(raiz, noh_deletado);
+      bool deleted = false;
+      raiz = interno_remover(raiz, noh_deletado, deleted);
     }
    }
 
